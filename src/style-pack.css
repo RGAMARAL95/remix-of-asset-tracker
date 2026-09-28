@@ -1,0 +1,326 @@
+/* StylePack — Asset Tracker (green identity)
+ *
+ * Ocean base re-skinned to a green identity. Geist Mono body, Barlow headings.
+ * 0.7rem radius. Light gray surface (#f4f6f7).
+ * CTA / accent green #93CA35; the Overview bento canvas is pinned to a deeper
+ * green gradient (#446013 → #709A28) at the screen level.
+ * Imported AFTER index.css — these values override the neutral defaults.
+ */
+
+:root {
+  --font-heading: "Barlow", sans-serif;
+  --font-body: "Geist Mono Variable", ui-monospace, monospace;
+  --font-heading-weight: 600;
+  --font-body-weight: 400;
+
+  /* Radius */
+  --radius: 0.7rem;
+
+  /* Core tokens */
+  --color-background: #f4f6f7;
+  --color-foreground: #0a2833;
+  --color-card: #fff;
+  --color-card-foreground: #313234;
+  --color-popover: #fafafb;
+  --color-popover-foreground: #454648;
+  --color-primary: #93CA35;
+  --color-primary-foreground: #16300a;
+  --color-secondary: oklch(97% 0 0);
+  --color-secondary-foreground: oklch(20.5% 0 0);
+  --color-muted: #efefef;
+  /* Was #7d7e81, which measures 4.06:1 on white — under the 4.5 AA bar, on
+   * every piece of secondary text in the app. Found by scripts/a11y-contrast.js
+   * rather than by eye, which is the point of having it. #6e6f72 is 5.02:1 and
+   * is not distinguishable from the old value side by side. */
+  --color-muted-foreground: #6e6f72;
+  --color-accent: #edf1f4;
+  --color-accent-foreground: #0a2833;
+  --color-destructive: oklch(57.7% 0.245 27.325);
+  --color-destructive-foreground: #fff;
+  --color-border: #e9e9e9;
+  --color-input: #e9e9e9;
+  --color-ring: #93CA35;
+  --color-sidebar: #f4f6f7;
+  --color-sidebar-foreground: #454648;
+  --color-sidebar-primary: #93CA35;
+  --color-sidebar-primary-foreground: #16300a;
+  --color-sidebar-accent: #edf1f4;
+  --color-sidebar-accent-foreground: #0a2833;
+  --color-sidebar-border: #e9e9e9;
+  --color-sidebar-ring: #93CA35;
+}
+
+/* Overview bento canvas + frosted tiles.
+ * The green gradient IS the design — tiles sit on it as translucent glass. */
+/* The canvas. Deeper than it was, and that is forced by the maths, not taste.
+ *
+ * Tinted cards with white text only work if the canvas is dark enough. At the
+ * old #709A28 bottom end, a 16% white card came out at #87AA4A and white text
+ * on it measured 2.67:1 — which is exactly why the first attempt at this look
+ * failed and we went to opaque white cards instead. The top end was always
+ * fine at 4.87:1; it was the light bottom that broke it.
+ *
+ * At #284211 the same card is #4A6037: white text lands at 6.95:1 and white at
+ * 75% — the secondary label tone — still clears 4.75:1. That is the lightest
+ * green that leaves room for dimmed text. */
+.nw-canvas {
+  background: linear-gradient(180deg, #16280a 0%, #284211 100%);
+}
+
+/* THE TILE — one surface, used by the dashboard and the landing marquee.
+ *
+ * Both classes are defined together on purpose. They were two blocks with two
+ * sets of values and they drifted: the marquee sat at 14% white with white
+ * text while the dashboard was opaque white with dark text, so the same
+ * component read as two different products on the same gradient. Defining them
+ * as one selector means they cannot drift again.
+ *
+ * Tinted glass at 16%, and the history matters because this went back and
+ * forth. We tried 14%, then 80%, then 94% with saturate, then opaque white —
+ * and this comment argued for opaque white long after the code had returned to
+ * glass, which is its own lesson about comments that state a verdict.
+ *
+ * What settled it was the canvas going darker. The argument for opaque was that
+ * a translucent card has as many backgrounds as the thing behind it, so every
+ * colour on it needs its own contrast exception. That is still true — it is why
+ * the tokens below are all checked against the LIGHTEST card the gradient makes
+ * (#4A6037), the worst case. Once they were, 16% reads everywhere and the
+ * gradient shows through, which opaque white did not.
+ *
+ * Three shadow layers, not one: a hairline ring (this replaces the border, so
+ * it cannot add to the box size), a tight contact shadow, and a soft ambient
+ * glow. On a gradient the tile edge melts into the background wherever the two
+ * greens agree — the contact layer is what gives it back.
+ *
+ * Radius 15 is the reference's. Its shape scale has no 24 and no 32.
+ */
+.card-solid,
+.card-tonal,
+.card-sheet {
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.18),
+    0 1px 3px rgba(0, 0, 0, 0.15),
+    0 0 10px rgba(0, 0, 0, 0.05);
+  border-radius: 15px;
+
+  /* Everything a tile body needs, all white or near-white.
+   *
+   * Checked against the LIGHTEST card the gradient produces (#4A6037):
+   * white is 6.95:1 and white at 75% is 4.75:1. Nothing dimmer than 75%
+   * passes, so 75% is the floor for any text — there is no fainter tier. */
+  --tile-fg: #fff;
+  --tile-muted: rgba(255, 255, 255, 0.75);
+  --tile-track: rgba(255, 255, 255, 0.22);
+  --tile-fill: #93ca35;   /* share bars, not white */
+  --tile-line: rgba(255, 255, 255, 0.22);
+  --tile-chip: rgba(255, 255, 255, 0.16);
+  --tile-hover: rgba(255, 255, 255, 0.20);
+  /* Data graphics carry COLOUR, not white. White is for text and for
+   * structural lines; anything that encodes a value gets a hue, which is how
+   * the weather reference does it — its temperature ranges, air quality and UV
+   * scales are all coloured while the compass and pressure dials stay white.
+   *
+   * All checked against the lightest card (#4A6037). A graphic needs about
+   * 3:1 to read; the two that double as TEXT need 4.5:1. */
+  --tile-series: #93ca35;  /* 3.56:1 — the brand lime, for chart lines */
+  --tile-chart-2: #8fd3e8; /* 4.19:1 — sky, the liquid half of Liquidity */
+  --tile-chart-3: #f6c177; /* 4.24:1 — amber */
+  --tile-chart-4: #c3a6e0; /* 3.26:1 — lilac */
+  /* Money up / money down. Both are used as text as well as bars, so both must
+   * clear 4.5 — which is why the negative is a light coral rather than a
+   * saturated red: #E88B7D only reaches 2.79:1 here.
+   *
+   * The negative was #f4b4ab, which measured 3.96:1 and was annotated "see note
+   * below" — there was no note below. It failed AA as text for as long as it
+   * shipped, on every negative figure on the dashboard. #f7c7bf is the nearest
+   * coral to it that actually passes, so nothing else about the design moves. */
+  --tile-pos: #c6e89a;     /* 5.10:1 */
+  --tile-neg: #f7c7bf;     /* 4.60:1 */
+}
+
+/* The Assets table and the two asset forms — the same tinted glass as a tile.
+ *
+ * This was an opaque white card, and the comment here used to argue it had to
+ * stay one: the table is a shadcn component whose rows, borders and muted text
+ * all resolve from light-mode tokens, so a dark surface would leave dark text
+ * on dark in a dozen places.
+ *
+ * That was true, and it is what the block below fixes. shadcn's colours are CSS
+ * VARIABLES, so redefining them here re-points every control inside this card
+ * at once — no `ui/*` file is touched, which matters because those are shared
+ * with the dialogs and must keep their light values.
+ *
+ * The proof this reads: the Holdings tile is already a scrolling list of these
+ * exact asset names and values on this exact surface.
+ *
+ * Values come from the tile tokens rather than new numbers, so the whole app
+ * has one set. The 75% floor on muted text is not a style choice — it is the
+ * dimmest that still clears 4.5:1 on the lightest card the gradient makes.
+ *
+ * CAVEAT: portalled content escapes this scope. A Select's dropdown, tooltips
+ * and dialogs render into <body>, outside this card, so they keep the light
+ * tokens. That is intended — the reference's popovers and panels are #FFF — but
+ * it means a dark trigger can open a light menu.
+ *
+ * The SURFACE (background, blur, shadow, radius) is declared with .card-solid
+ * and .card-tonal above, not here. That block is also where the --tile-* tokens
+ * live, and this class has to be in the same selector to see them.
+ *
+ * It was not, at first, and everything below silently broke: `var(--tile-line)`
+ * resolved to nothing, so `--color-border` was invalid, so every border fell
+ * back to `currentColor` — pure white. The table got a hard white box and hard
+ * white row rules and the whole screen looked flat and outlined. Text still
+ * looked fine because it inherited white from the shell, which is why a
+ * contrast sweep passed while the screen was visibly wrong. */
+.card-sheet {
+  /* Every shadcn token used by anything inside this card, re-pointed at the
+   * dark surface. Miss one and it fails the old way: dark text on dark. */
+  --color-foreground: var(--tile-fg);
+  --color-card-foreground: var(--tile-fg);
+  --color-muted-foreground: var(--tile-muted);
+  --color-background: transparent;
+  --color-card: transparent;
+  --color-muted: var(--tile-chip);
+  --color-accent: var(--tile-chip);
+  --color-accent-foreground: var(--tile-fg);
+  --color-border: var(--tile-line);
+  --color-input: var(--tile-line);
+  --color-ring: rgba(255, 255, 255, 0.6);
+  --color-secondary: var(--tile-chip);
+  --color-secondary-foreground: var(--tile-fg);
+  /* Negative money in the Value column. Same token the tiles use, so a
+   * liability is the same colour wherever you meet it. */
+  --color-destructive: var(--tile-neg);
+
+  color: var(--tile-fg);
+}
+
+/* The switch's thumb, and why it is not a token.
+ *
+ * --color-background does two jobs: it fills the input and select fields, where
+ * transparent is right on glass, and it paints this thumb, where transparent
+ * means invisible. Setting the token to white would turn every field into a
+ * white box; leaving it transparent turned the switch into a plain lime pill
+ * with no way to tell on from off. So the thumb gets its own rule.
+ *
+ * Worth noting the contrast checker cannot catch this — a missing thumb is not
+ * text, so it has no ratio to fail. Only looking at it finds it. */
+.card-sheet button[role="switch"] > span {
+  background: #fff;
+}
+
+/* The lattice. One number: 192. A two-span is 192 + 16 + 192 = 400, so every
+ * size lands on the same grid and nothing is ever half a step out.
+ *
+ * auto-fill with a FIXED track (not minmax) means columns never stretch — the
+ * count changes instead. justify-content: center splits the leftover evenly,
+ * so the grid itself needs no breakpoints.
+ *
+ * Measured against its own container rather than the window. The sidebar that
+ * first forced this is gone, so viewport queries would work now too; container
+ * queries stay because they also hold up inside the picker's scaled previews. */
+.bento-viewport {
+  container-type: inline-size;
+  container-name: bento;
+}
+
+.bento-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr); /* phone: one fluid column */
+  gap: 16px;
+  justify-content: center;
+  max-width: 1232px; /* 6×192 + 5×16 — the six-column cap */
+  margin-inline: auto;
+}
+
+/* 608px = 3×192 + 2×16. Below this a span-2 tile cannot fit two tracks plus the
+ * gap; the browser invents an implicit column and the tile renders squashed
+ * (measured: 208×400 at a 375px viewport). So the base state is one fluid
+ * column, and the lattice only switches on once three real columns fit. */
+@container bento (min-width: 608px) {
+  .bento-grid {
+    grid-template-columns: repeat(auto-fill, 192px);
+    grid-auto-rows: 192px;
+    /* NO grid-auto-flow: dense.
+     *
+     * We had it, the reference does not — its captured CSS is just auto-fill,
+     * gap and justify-content (cloudkit-raw-css.md). Dense makes a later small
+     * tile jump BACKWARDS to fill a hole an earlier large one left, so the
+     * visual position stops matching the list order. That is what made
+     * dragging feel broken: the drop index and the place the tile appeared
+     * were different things. Without it a gap simply stays a gap and order is
+     * order. */
+  }
+  .bento-2x1 {
+    grid-column: span 2;
+  }
+  .bento-2x2 {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+}
+
+/* Page title. 34/41 w700 at letter-spacing +0.374 — POSITIVE. The reference
+ * inverts tracking by size: big text tracks positive, small text negative. Our
+ * base.css scale tracks -2.4px at this size, so the title cannot use it. */
+.dash-title {
+  font-size: 34px;
+  line-height: 41px;
+  font-weight: 700;
+  letter-spacing: 0.374px;
+}
+
+/* The metric — every big number on a tile.
+ *
+ * The reference is explicit: "Numbers use SF Pro Rounded. Everything else is
+ * SF Pro Text/Display." `ui-rounded` is the CSS generic that resolves to SF Pro
+ * Rounded on Apple platforms and falls back gracefully elsewhere.
+ *
+ * ONE size, not three. The reference says "the metric is the same 34px in every
+ * size — only the chart shrinks", and we had been scaling it down at Small,
+ * which broke the rule rather than the pixel.
+ *
+ * Tracking is POSITIVE here, like the page title: big text tracks positive,
+ * small text tracks negative. Our base scale does the opposite at this size, so
+ * the metric cannot use it.
+ */
+.metric {
+  font-family: ui-rounded, "SF Pro Rounded", "Hiragino Maru Gothic ProN",
+    system-ui, sans-serif;
+  font-size: 34px;
+  line-height: 41px;
+  font-weight: 700;
+  letter-spacing: 0.374px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Menus and dialogs. Radius 4 — not the app's 0.7rem — and a two-layer shadow.
+ * The same shell on the account menu, the tile menu and the confirm dialog. */
+.ref-popover {
+  background: #fff;
+  border-radius: 4px;
+  box-shadow:
+    0 0 15px rgba(0, 0, 0, 0.15),
+    0 0 1px rgba(0, 0, 0, 0.047);
+}
+
+body {
+  text-rendering: optimizeLegibility;
+  text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  font-weight: var(--font-body-weight);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: var(--font-heading-weight);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
